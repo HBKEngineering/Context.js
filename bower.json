@@ -23,6 +23,10 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "demo.html",
+    "demo.js",
+    "demo2.html",
+    "demo2.js"
   ]
 }
