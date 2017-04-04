@@ -4,6 +4,7 @@
  * MIT License
  *
  * Modified by Joshua Christman
+ * Further modified by Brett Neese + Mike Naughton, HBK Engineering
  */
 
 context = (function() {
@@ -198,22 +199,6 @@ context = (function() {
 		pushMenuData(id, data);
 
 		return id;
-
-		/*if (typeof data.id !== 'undefined' && typeof data.data !== 'undefined') {
-			id = data.id;
-			$menu = $('body').find('#dropdown-' + id)[0];
-			if (typeof $menu === 'undefined') {
-				$menu = buildMenu(data.data, id);
-				//$('body').append($menu); // instead of appending, just add to menuData 
-			}
-		} else {
-			id = (new Date()).getTime();
-
-			//$('body').append(buildMenu(data, id)); // instead of appending, just add to menuData 
-		}
-		
-// instead of appending, just add to menuData 
-		return //id: items;*/
 	}
 
 	function _contextHandlerWrapper(id, $target) {
