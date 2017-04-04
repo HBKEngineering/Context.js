@@ -138,7 +138,6 @@ context = (function() {
 	}
 
 	function _contextHandler(e, id, $target) {
-		console.log('hello contextHandler')
 		e.preventDefault();
 		e.stopPropagation();
 		
