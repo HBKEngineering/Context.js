@@ -7,6 +7,8 @@
  */
 
 context = (function() {
+	var $context;
+	var menuData;
 
 	var options = {
 		fadeSpeed: 100,
@@ -16,11 +18,13 @@ context = (function() {
 		above: 'auto',
 		left: 'auto',
 		preventDoubleContext: true,
-		compress: false
-	};
+		compress: false,
+		elementId: 'dropdown-menu-contextjs'
+	},
+	selectorToDropdownIdRefs = {};
+
 
 	function initialize(opts) {
-
 		options = $.extend({}, options, opts);
 
 		$(document).on('click', function() {
@@ -45,6 +49,8 @@ context = (function() {
 			}
 		});
 
+		menuData = {};
+
 	}
 
 	function updateOptions(opts) {
@@ -54,8 +60,8 @@ context = (function() {
 	function buildMenu(data, id, subMenu) {
 		var subClass = (subMenu) ? ' dropdown-context-sub' : '',
 			compressed = options.compress ? ' compressed-context' : '',
-			$menu = $('<ul class="dropdown-menu dropdown-context' + subClass + compressed + '" id="dropdown-' + id + '"></ul>');
-		return buildMenuItems($menu, data, id, subMenu);
+			$menu = $('<ul class="dropdown-menu dropdown-context' + subClass + compressed + '" id="' + options.elementId + '"></ul>');
+			return buildMenuItems($menu, data, id, subMenu);
 	}
 
 	function buildMenuItems($menu, data, id, subMenu, addDynamicTag) {
@@ -116,6 +122,7 @@ context = (function() {
 						.addClass('context-event')
 						.on('click', createCallback($action));
 				}
+				
 				$menu.append($sub);
 				if (typeof data[i].subMenu != 'undefined') {
 					var subMenuData = buildMenu(data[i].subMenu, id, true);
@@ -130,22 +137,16 @@ context = (function() {
 	}
 
 	function _contextHandler(e, id, $target) {
+		console.log('hello contextHandler')
 		e.preventDefault();
 		e.stopPropagation();
-
+		
+		var menuItems = getMenuData(id);
 		currentContextSelector = $(e.target);
 
 		$('.dropdown-context:not(.dropdown-context-sub)').hide();
-
-		$dd = $('#dropdown-' + id);
-
-		$dd.find('.dynamic-menu-item').remove(); // Destroy any old dynamic menu items
-		$dd.find('.dynamic-menu-src').each(function(idx, element) {
-			var menuItems = window[$(element).data('src')]($target);
-			$parentMenu = $(element).closest('.dropdown-menu.dropdown-context');
-			$parentMenu = buildMenuItems($parentMenu, menuItems, id, undefined, true);
-		});
-
+		$dd = buildMenu(menuItems, id, undefined);
+		
 		if (typeof options.above == 'boolean' && options.above) {
 			$dd.addClass('dropdown-context-up').css({
 				top: e.pageY - 20 - $('#dropdown-' + id).height(),
@@ -180,25 +181,39 @@ context = (function() {
 				});
 			}
 		}
+
+		$menu = $('#' + options.elementId);
+		if (!$menu || !$menu.length) {
+			$('body').append($dd);
+		} else {
+			$menu.replaceWith($dd)
+		}
+		
 	}
 
 	function _setupMenu(data) {
-		var id;
+		var id = data.id || (new Date()).getTime();
+		var data = data.data || data;
 
-		if (typeof data.id !== 'undefined' && typeof data.data !== 'undefined') {
+		pushMenuData(id, data);
+
+		return id;
+
+		/*if (typeof data.id !== 'undefined' && typeof data.data !== 'undefined') {
 			id = data.id;
 			$menu = $('body').find('#dropdown-' + id)[0];
 			if (typeof $menu === 'undefined') {
 				$menu = buildMenu(data.data, id);
-				$('body').append($menu);
+				//$('body').append($menu); // instead of appending, just add to menuData 
 			}
 		} else {
 			id = (new Date()).getTime();
 
-			$('body').append(buildMenu(data, id));
+			//$('body').append(buildMenu(data, id)); // instead of appending, just add to menuData 
 		}
-
-		return id;
+		
+// instead of appending, just add to menuData 
+		return //id: items;*/
 	}
 
 	function _contextHandlerWrapper(id, $target) {
@@ -215,7 +230,7 @@ context = (function() {
 
 	function addContextDelegate(el, selector, data) {
 		var $el = (el instanceof jQuery) ? el : $(el);
-
+		
 		$el.on('contextmenu', selector, 
 				_contextHandlerWrapper(_setupMenu(data), $el.find(selector)));
 	}
@@ -229,6 +244,18 @@ context = (function() {
 
 		$el.off('contextmenu', selector);
 		$(document).off('click', '.context-event');
+	}
+
+	function pushMenuData(id, data){
+		menuData[id] = data;
+	}
+
+	function getMenuData(id){
+		return menuData[id];
+	}
+
+	function clearMenuData(id){
+		delete menuData[selector];
 	}
 
 	return {
