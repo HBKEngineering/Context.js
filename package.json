@@ -1,0 +1,10 @@
+{
+  "name": "context.js",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "license": "Unlicense",
+  "dependencies": {
+    "jquery": "^1.8.x || ^2.x.x"
+  }
+}
