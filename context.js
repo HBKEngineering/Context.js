@@ -140,6 +140,12 @@ context = (function() {
 	function _contextHandler(e, id, $target) {
 		e.preventDefault();
 		e.stopPropagation();
+
+		if(e._contextHandled){
+			return;
+		}
+		
+		e._contextHandled = true;
 		
 		var menuItems = getMenuData(id);
 		currentContextSelector = $(e.target);
