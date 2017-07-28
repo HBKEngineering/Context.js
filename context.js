@@ -10,6 +10,7 @@
 context = (function() {
 	var $context;
 	var menuData;
+	var uniqueGenerator = 0;
 
 	var options = {
 		fadeSpeed: 100,
@@ -24,6 +25,13 @@ context = (function() {
 	},
 	selectorToDropdownIdRefs = {};
 
+	function uniqueId($selector){
+		if(!$selector.attr('id')){
+			$selector.attr('id', 'cm-' + uniqueGenerator++);
+		}
+
+		return $selector.attr('id');
+	}
 
 	function initialize(opts) {
 		options = $.extend({}, options, opts);
@@ -137,14 +145,14 @@ context = (function() {
 		return $menu;
 	}
 
-	function _contextHandler(e, id, $target) {
+	function _contextHandler(e, id) {
 		e.preventDefault();
 		e.stopPropagation();
 
 		if(e._contextHandled){
 			return;
 		}
-		
+
 		e._contextHandled = true;
 		
 		var menuItems = getMenuData(id);
@@ -197,8 +205,8 @@ context = (function() {
 		
 	}
 
-	function _setupMenu(data) {
-		var id = data.id || (new Date()).getTime();
+	function _setupMenu(data, $target) {
+		var id = data.id || uniqueId($target);
 		var data = data.data || data;
 
 		pushMenuData(id, data);
@@ -206,32 +214,52 @@ context = (function() {
 		return id;
 	}
 
-	function _contextHandlerWrapper(id, $target) {
-		return function(e) {
-			_contextHandler(e, id, $target);
+	function _contextHandlerWrapper(data, selector, $target) {
+		var menuId;
+
+		if(typeof selector === 'string'){
+			menuId = selector;
+			_setupMenu({
+				id: menuId,
+				data: data
+			}, $target);
+		} else {
+			menuId = _setupMenu(data, $target);
 		}
+
+		return function(e) {
+			_contextHandler(e, menuId);
+		};
 	}
 
 	function addContext(selector, data) {
 		var $target = $(selector);
-		$target.on('contextmenu', 
-				_contextHandlerWrapper(_setupMenu(data), $target));
+		
+		$target.on('contextmenu',
+			_contextHandlerWrapper(data, selector, $target));
 	}
 
 	function addContextDelegate(el, selector, data) {
 		var $el = (el instanceof jQuery) ? el : $(el);
-		
-		$el.on('contextmenu', selector, 
-				_contextHandlerWrapper(_setupMenu(data), $el.find(selector)));
+		var $target = $el.find(selector);
+
+		$el.on('contextmenu', selector,
+			_contextHandlerWrapper(data, selector, $target));
 	}
 
 	function destroyContext(selector) {
+		var $target = $(selector);
+
+		clearMenuData(uniqueId($target));
+
 		$(document).off('contextmenu', selector).off('click', '.context-event');
 	}
 
 	function destroyContextDelegate(el, selector) {
 		var $el = (el instanceof jQuery) ? el : $(el);
+		var $target = $el.find(selector);
 
+		clearMenuData(uniqueId($target));
 		$el.off('contextmenu', selector);
 		$(document).off('click', '.context-event');
 	}
@@ -245,7 +273,7 @@ context = (function() {
 	}
 
 	function clearMenuData(id){
-		delete menuData[selector];
+		delete menuData[id];
 	}
 
 	return {
