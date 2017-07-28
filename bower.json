@@ -28,5 +28,6 @@
     "demo.js",
     "demo2.html",
     "demo2.js"
-  ]
+  ],
+  "version": "0.1.0"
 }
