@@ -13,17 +13,17 @@ context = (function() {
 	var uniqueGenerator = 0;
 
 	var options = {
-		fadeSpeed: 100,
-		filter: function($obj) {
-			// Modify $obj, Do not return
+			fadeSpeed: 100,
+			filter: function($obj) {
+				// Modify $obj, Do not return
+			},
+			above: 'auto',
+			left: 'auto',
+			preventDoubleContext: true,
+			compress: false,
+			elementId: 'dropdown-menu-contextjs'
 		},
-		above: 'auto',
-		left: 'auto',
-		preventDoubleContext: true,
-		compress: false,
-		elementId: 'dropdown-menu-contextjs'
-	},
-	selectorToDropdownIdRefs = {};
+		selectorToDropdownIdRefs = {};
 
 	function uniqueId($selector){
 		if(!$selector.attr('id')){
@@ -70,7 +70,7 @@ context = (function() {
 		var subClass = (subMenu) ? ' dropdown-context-sub' : '',
 			compressed = options.compress ? ' compressed-context' : '',
 			$menu = $('<ul class="dropdown-menu dropdown-context' + subClass + compressed + '" id="' + options.elementId + '"></ul>');
-			return buildMenuItems($menu, data, id, subMenu);
+		return buildMenuItems($menu, data, id, subMenu);
 	}
 
 	function buildMenuItems($menu, data, id, subMenu, addDynamicTag) {
@@ -131,7 +131,7 @@ context = (function() {
 						.addClass('context-event')
 						.on('click', createCallback($action));
 				}
-				
+
 				$menu.append($sub);
 				if (typeof data[i].subMenu != 'undefined') {
 					var subMenuData = buildMenu(data[i].subMenu, id, true);
@@ -154,24 +154,40 @@ context = (function() {
 		}
 
 		e._contextHandled = true;
-		
+
 		var menuItems = getMenuData(id);
 		currentContextSelector = $(e.target);
 
 		$('.dropdown-context:not(.dropdown-context-sub)').hide();
 		$dd = buildMenu(menuItems, id, undefined);
-		
+
+		var computedHeight = 0;
+		var DIVIDER_HEIGHT = 19;
+		var ITEM_HEIGHT = 26;
+
+		for(var i = 0; i < menuItems.length; i++){
+			if(typeof menuItems[i].divider !== 'undefined'){
+				computedHeight += DIVIDER_HEIGHT;
+			} else {
+				computedHeight += ITEM_HEIGHT;
+			}
+		}
+
+		var computedWidth = Math.max($dd.width(), 158); // 158 is the "default" width from bootstrap
+
+		computedHeight = Math.max($dd.height(), computedHeight);
+
 		if (typeof options.above == 'boolean' && options.above) {
 			$dd.addClass('dropdown-context-up').css({
-				top: e.pageY - 20 - $('#dropdown-' + id).height(),
+				top: e.pageY - 20 - computedHeight,
 				left: e.pageX - 13
 			}).fadeIn(options.fadeSpeed);
 		} else if (typeof options.above == 'string' && options.above == 'auto') {
 			$dd.removeClass('dropdown-context-up');
-			var autoH = $dd.height() + 30;
+			var autoH = computedHeight + 30;
 			if ((e.pageY + autoH - $(window).scrollTop()) > $(window).height()) {
 				$dd.addClass('dropdown-context-up').css({
-					top: e.pageY - 20 - autoH,
+					top: e.pageY - 20 - computedHeight,
 					left: e.pageX - 13
 				}).fadeIn(options.fadeSpeed);
 			} else {
@@ -184,14 +200,14 @@ context = (function() {
 
 		if (typeof options.left == 'boolean' && options.left) {
 			$dd.addClass('dropdown-context-left').css({
-				left: e.pageX - $dd.width()
+				left: e.pageX - computedWidth
 			}).fadeIn(options.fadeSpeed);
 		} else if (typeof options.left == 'string' && options.left == 'auto') {
 			$dd.removeClass('dropdown-context-left');
-			var autoL = $dd.width() - 12;
+			var autoL = computedWidth - 12;
 			if ((e.pageX + autoL) > $('html').width()) {
 				$dd.addClass('dropdown-context-left').css({
-					left: e.pageX - $dd.width() + 13
+					left: e.pageX - computedWidth + 13
 				});
 			}
 		}
@@ -202,7 +218,7 @@ context = (function() {
 		} else {
 			$menu.replaceWith($dd)
 		}
-		
+
 	}
 
 	function _setupMenu(data, $target) {
@@ -234,7 +250,7 @@ context = (function() {
 
 	function addContext(selector, data) {
 		var $target = $(selector);
-		
+
 		$target.on('contextmenu',
 			_contextHandlerWrapper(data, selector, $target));
 	}
@@ -289,7 +305,7 @@ context = (function() {
 var createCallback = function(func) {
 	return function(event) {
 		func(event, currentContextSelector)
-	
+
 	};
 }
 
