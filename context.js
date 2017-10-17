@@ -146,6 +146,12 @@ context = (function() {
 	}
 
 	function _contextHandler(e, id) {
+		var menuItems = getMenuData(id);
+
+		if(!menuItems){
+			return;
+		}
+
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -155,7 +161,6 @@ context = (function() {
 
 		e._contextHandled = true;
 
-		var menuItems = getMenuData(id);
 		currentContextSelector = $(e.target);
 
 		$('.dropdown-context:not(.dropdown-context-sub)').hide();
