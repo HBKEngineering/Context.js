@@ -285,6 +285,13 @@ context = (function() {
 		$(document).off('click', '.context-event');
 	}
 
+	function showContext(e, data) {
+		var $target = e.target;
+		var menuId = _setupMenu(data, $target);
+
+		_contextHandler(e, menuId);
+	}
+
 	function pushMenuData(id, data){
 		menuData[id] = data;
 	}
@@ -303,7 +310,8 @@ context = (function() {
 		attach: addContext,
 		attachDelegate: addContextDelegate,
 		destroy: destroyContext,
-		destroyDelegate: destroyContextDelegate
+		destroyDelegate: destroyContextDelegate,
+		show: showContext
 	};
 })();
 
