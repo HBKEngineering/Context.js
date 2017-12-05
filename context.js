@@ -273,7 +273,7 @@ context = (function() {
 
 		clearMenuData(uniqueId($target));
 
-		$(document).off('contextmenu', selector).off('click', '.context-event');
+		$target.off('contextmenu').off('click', '.context-event');
 	}
 
 	function destroyContextDelegate(el, selector) {
