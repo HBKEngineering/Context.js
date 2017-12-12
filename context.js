@@ -253,11 +253,19 @@ context = (function() {
 		};
 	}
 
+	//Mimic same logic inside context handler wrapper to return the menuId from selector & target
+	function _deriveMenuId(selector, $target){
+		return ((typeof selector === 'string') ? selector : uniqueId($target));
+	}
+
+
 	function addContext(selector, data) {
 		var $target = $(selector);
 
 		$target.on('contextmenu',
 			_contextHandlerWrapper(data, selector, $target));
+
+		return _deriveMenuId(selector, $target);
 	}
 
 	function addContextDelegate(el, selector, data) {
@@ -266,23 +274,30 @@ context = (function() {
 
 		$el.on('contextmenu', selector,
 			_contextHandlerWrapper(data, selector, $target));
+
+		return _deriveMenuId(selector, $target);
 	}
 
 	function destroyContext(selector) {
 		var $target = $(selector);
+		var menuId = _deriveMenuId(selector, $target);
 
-		clearMenuData(uniqueId($target));
+		clearMenuData(menuId);
 
-		$target.off('contextmenu').off('click', '.context-event');
+		$(document).off('contextmenu', selector).off('click', '.context-event');
+		return menuId;
 	}
 
 	function destroyContextDelegate(el, selector) {
 		var $el = (el instanceof jQuery) ? el : $(el);
 		var $target = $el.find(selector);
+		var menuId = _deriveMenuId(selector, $target);
 
-		clearMenuData(uniqueId($target));
+		clearMenuData(menuId);
 		$el.off('contextmenu', selector);
 		$(document).off('click', '.context-event');
+
+		return menuId;
 	}
 
 	function showContext(e, data) {
@@ -304,6 +319,14 @@ context = (function() {
 		delete menuData[id];
 	}
 
+	function updateMenu(menuId, data){
+		var individualMenuData = getMenuData(menuId);
+
+		if(individualMenuData){
+			pushMenuData(menuId, data);
+		}
+	}
+
 	return {
 		init: initialize,
 		settings: updateOptions,
@@ -311,7 +334,8 @@ context = (function() {
 		attachDelegate: addContextDelegate,
 		destroy: destroyContext,
 		destroyDelegate: destroyContextDelegate,
-		show: showContext
+		show: showContext,
+		updateMenu: updateMenu
 	};
 })();
 
