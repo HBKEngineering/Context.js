@@ -121,15 +121,33 @@ context = (function() {
 					element += '><a tabindex="-1" href="' + data[i].href + '"' + linkTarget + '>';
 					if (typeof data[i].icon !== 'undefined')
 						element += '<span class="glyphicon ' + data[i].icon + '"></span> ';
-					element += data[i].text + '</a></li>';
+					element += data[i].text;
+					if (data[i].checked === true)
+						element += '<span class="context-check-icon glyphicon glyphicon-ok"></span> ';
+					element += '</a></li>';
 					$sub = $(element);
 				}
 				if (typeof data[i].action !== 'undefined') {
 					$action = data[i].action;
-					$sub
-						.find('a')
+					var $link = $sub.find('a');
+					$link
 						.addClass('context-event')
 						.on('click', createCallback($action));
+					
+					if(data[i].checkable){
+						$link.on('click', function(evt){
+							var $checkEl = $link.find('.context-check-icon');
+							if($checkEl.length > 0){
+								$checkEl.remove();
+								data[i].checked = false;
+							} else {
+								$link.append('<span class="context-check-icon glyphicon glyphicon-ok"></span> ');
+								data[i].checked = true;
+							}
+							
+							evt.stopPropagation();
+						});
+					}
 				}
 
 				$menu.append($sub);
