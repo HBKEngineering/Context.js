@@ -37,7 +37,7 @@ context = (function() {
 		options = $.extend({}, options, opts);
 
 		$(document).on('click', function() {
-			$('.dropdown-context').fadeOut(options.fadeSpeed, function() {
+			$('.dropdown-context').fadeOut(options.fadeSpeed, function () {
 				$('.dropdown-context').css({
 					display: ''
 				}).find('.drop-left').removeClass('drop-left');
@@ -76,65 +76,86 @@ context = (function() {
 	function buildMenuItems($menu, data, id, subMenu, addDynamicTag) {
 		var linkTarget = '';
 		for (var i = 0; i < data.length; i++) {
-			if (typeof data[i].divider !== 'undefined') {
+			var dataItem = data[i];
+			if (typeof dataItem.divider !== 'undefined') {
 				var divider = '<li class="divider';
 				divider += (addDynamicTag) ? ' dynamic-menu-item' : '';
 				divider += '"></li>';
 				$menu.append(divider);
-			} else if (typeof data[i].header !== 'undefined') {
+			} else if (typeof dataItem.header !== 'undefined') {
 				var header = '<li class="nav-header';
 				header += (addDynamicTag) ? ' dynamic-menu-item' : '';
-				header += '">' + data[i].header + '</li>';
+				header += '">' + dataItem.header + '</li>';
 				$menu.append(header);
-			} else if (typeof data[i].menu_item_src !== 'undefined') {
+			} else if (typeof dataItem.menu_item_src !== 'undefined') {
 				var funcName;
-				if (typeof data[i].menu_item_src === 'function') {
-					if (data[i].menu_item_src.name === "") { // The function is declared like "foo = function() {}"
+				if (typeof dataItem.menu_item_src === 'function') {
+					if (dataItem.menu_item_src.name === "") { // The function is declared like "foo = function() {}"
 						for (var globalVar in window) {
-							if (data[i].menu_item_src == window[globalVar]) {
+							if (dataItem.menu_item_src == window[globalVar]) {
 								funcName = globalVar;
 								break;
 							}
 						}
 					} else {
-						funcName = data[i].menu_item_src.name;
+						funcName = dataItem.menu_item_src.name;
 					}
 				} else {
-					funcName = data[i].menu_item_src;
+					funcName = dataItem.menu_item_src;
 				}
 				$menu.append('<li class="dynamic-menu-src" data-src="' + funcName + '"></li>');
 			} else {
-				if (typeof data[i].href == 'undefined') {
-					data[i].href = '#';
+				if (typeof dataItem.href == 'undefined') {
+					dataItem.href = '#';
 				}
-				if (typeof data[i].target !== 'undefined') {
-					linkTarget = ' target="' + data[i].target + '"';
+				if (typeof dataItem.target !== 'undefined') {
+					linkTarget = ' target="' + dataItem.target + '"';
 				}
-				if (typeof data[i].subMenu !== 'undefined') {
+				if (typeof dataItem.subMenu !== 'undefined') {
 					var sub_menu = '<li class="dropdown-submenu';
 					sub_menu += (addDynamicTag) ? ' dynamic-menu-item' : '';
-					sub_menu += '"><a tabindex="-1" href="' + data[i].href + '">' + data[i].text + '</a></li>'
+					sub_menu += '"><a tabindex="-1" href="' + dataItem.href + '">' + dataItem.text + '</a></li>'
 					$sub = (sub_menu);
 				} else {
 					var element = '<li';
 					element += (addDynamicTag) ? ' class="dynamic-menu-item"' : '';
-					element += '><a tabindex="-1" href="' + data[i].href + '"' + linkTarget + '>';
-					if (typeof data[i].icon !== 'undefined')
-						element += '<span class="glyphicon ' + data[i].icon + '"></span> ';
-					element += data[i].text + '</a></li>';
+					element += '><a tabindex="-1" href="' + dataItem.href + '"' + linkTarget + '>';
+					if (typeof dataItem.icon !== 'undefined')
+						element += '<span class="glyphicon ' + dataItem.icon + '"></span> ';
+					element += dataItem.text;
+					if (dataItem.checked === true)
+						element += '<span class="context-check-icon glyphicon glyphicon-ok"></span> ';
+					element += '</a></li>';
 					$sub = $(element);
 				}
-				if (typeof data[i].action !== 'undefined') {
-					$action = data[i].action;
-					$sub
-						.find('a')
+				if (typeof dataItem.action !== 'undefined') {
+					$action = dataItem.action;
+					var $link = $sub.find('a');
+					$link
 						.addClass('context-event')
 						.on('click', createCallback($action));
+
+					if(dataItem.checkable){
+						$link
+							.addClass('context-checkable')
+							.on('click', function(evt){
+								var $checkEl = $link.find('.context-check-icon');
+								if($checkEl.length > 0){
+									$checkEl.remove();
+									dataItem.checked = false;
+								} else {
+									$link.append('<span class="context-check-icon glyphicon glyphicon-ok"></span> ');
+									dataItem.checked = true;
+								}
+
+								evt.stopPropagation();
+							});
+					}
 				}
 
 				$menu.append($sub);
-				if (typeof data[i].subMenu != 'undefined') {
-					var subMenuData = buildMenu(data[i].subMenu, id, true);
+				if (typeof dataItem.subMenu != 'undefined') {
+					var subMenuData = buildMenu(dataItem.subMenu, id, true);
 					$menu.find('li:last').append(subMenuData);
 				}
 			}
