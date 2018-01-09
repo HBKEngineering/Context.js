@@ -36,7 +36,7 @@ context = (function() {
 	function initialize(opts) {
 		options = $.extend({}, options, opts);
 
-		$(document).on('click', function(evt) {
+		$(document).on('click', function() {
 			$('.dropdown-context').fadeOut(options.fadeSpeed, function () {
 				$('.dropdown-context').css({
 					display: ''
