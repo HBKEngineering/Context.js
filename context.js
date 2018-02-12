@@ -33,15 +33,19 @@ context = (function() {
 		return $selector.attr('id');
 	}
 
+	function hideContext(){
+		$('.dropdown-context').fadeOut(options.fadeSpeed, function () {
+			$('.dropdown-context').css({
+				display: ''
+			}).find('.drop-left').removeClass('drop-left');
+		});
+	}
+
 	function initialize(opts) {
 		options = $.extend({}, options, opts);
 
 		$(document).on('click', function() {
-			$('.dropdown-context').fadeOut(options.fadeSpeed, function () {
-				$('.dropdown-context').css({
-					display: ''
-				}).find('.drop-left').removeClass('drop-left');
-			});
+			hideContext();
 		});
 		if (options.preventDoubleContext) {
 			$(document).on('contextmenu', '.dropdown-context', function(e) {
@@ -356,6 +360,7 @@ context = (function() {
 		destroy: destroyContext,
 		destroyDelegate: destroyContextDelegate,
 		show: showContext,
+		hide: hideContext,
 		updateMenu: updateMenu
 	};
 })();
